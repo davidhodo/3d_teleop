@@ -1,0 +1,5 @@
+<launch>
+  <param name="use_sim_time" value="1" />
+  <node pkg="tf" type="static_transform_publisher" name="adjusted_kinect_broadcaster" args="0 0 0 0 0 0.174532925 /openni_rgb_optical_frame /adjusted_kinect_frame 100" />
+  <node pkg="misc_scripts" type="rename_tf_frame.py" name="kinect_tf_remapper" output="screen" />
+</launch>

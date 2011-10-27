@@ -1,0 +1,17 @@
+<package>
+  <description brief="misc_scripts">
+
+     misc_scripts
+
+  </description>
+  <author>William Woodall</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/misc_scripts</url>
+  <depend package="rospy"/>
+  <depend package="tf"/>
+  <depend package="sensor_msgs"/>
+
+</package>
+
+
