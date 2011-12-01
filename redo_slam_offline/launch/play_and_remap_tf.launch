@@ -1,0 +1,44 @@
+<launch>
+  <param name="/use_sim_time" value="true" />
+  
+  <arg name="bag_file" />
+  
+  <!-- Launch the bag playback -->
+  <!-- <node pkg="rosbag" name="rosbag" type="rosbag" required="true" -->
+        <!-- args="play - -clock -s 150 $(arg bag_file)"> -->
+  <!-- </node> -->
+  
+  <!-- Launch the tf remapper -->
+  <node pkg="misc_scripts" type="remap_tf.py" name="remap_tf">
+    <param name="rotation" value="-5.0" />
+  </node>
+  
+  <!-- Launch SLAM -->
+  <!-- Start Gmapping -->
+  <node pkg="gmapping" type="slam_gmapping" name="gmapping" 
+        output="screen">
+    <param name="inverted_laser" value="false" />
+    <param name="maxUrange" value="30.0" />
+    <param name="particles" value="30" />
+    <param name="delta" value="0.01" />
+    <param name="xmin" value="-15.0" />
+    <param name="xmax" value="15.0" />
+    <param name="ymin" value="-15.0" />
+    <param name="ymax" value="15.0" />
+    <param name="angularUpdate" value="0.025" />
+    <param name="linearUpdate" value="0.1" />
+    <param name="map_update_interval" value="1.0" />
+    <param name="resampleThreshold" value="0.3" />
+    <param name="llsamplerange" value ="0.05" />
+    <param name="llsamplestep" value ="0.05" />
+    <param name="lasamplerange" value ="0.05" />
+    <param name="lasamplestep" value ="0.05" />
+  </node>
+  
+  <!-- Launch the teleop server -->
+  <!-- <node pkg="teleop_server" type="teleop_server" name="teleop_server_node" -->
+        <!-- output="screen"> -->
+    <!-- <param name="rotation" value="-5.0" /> -->
+  <!-- </node> -->
+  
+</launch>

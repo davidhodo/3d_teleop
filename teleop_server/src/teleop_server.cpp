@@ -21,7 +21,7 @@ octomap::OcTreeROS *ros_tree;
 tf::TransformListener *listener;
 ros::Publisher *grid_cell_pub;
 ros::Publisher *point_cloud_pub;
-double resolution = 0.1;
+double resolution = 0.025;
 
 string pointcloud2_to_str(const sensor_msgs::PointCloud2::ConstPtr& msg) {
   stringstream ss;
@@ -39,7 +39,7 @@ bool first_time_setup() {
   tf::StampedTransform transform;
   
   try {
-    listener->lookupTransform("/odom", "/openni_rgb_optical_frame", ros::Time(0), transform);
+    listener->lookupTransform("/odom", "/openni_camera", ros::Time(0), transform);
   } catch (tf::TransformException ex) {
     ROS_ERROR("%s",ex.what());
     return false;
@@ -57,7 +57,7 @@ void publishOccupiedGridCells() {
   nav_msgs::GridCells msg;
   
   msg.header.stamp = ros::Time::now();
-  msg.header.frame_id = "/odom";
+  msg.header.frame_id = "/map";
   
   msg.cell_height = resolution;
   msg.cell_width = resolution;
@@ -91,7 +91,7 @@ void publishOccupiedPointCloud() {
   sensor_msgs::PointCloud msg;
   
   msg.header.stamp = ros::Time::now();
-  msg.header.frame_id = "/odom";
+  msg.header.frame_id = "/map";
   
   list<octomap::OcTreeVolume> occupied_leafs;
   
@@ -120,13 +120,24 @@ void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg) {
     return;
   ros::Time start, end;
   start = ros::Time::now();
+  ROS_INFO("The time is: %f", start.toSec());
   if (is_first_time)
     if (!first_time_setup())
       return;
   
+  // tf::StampedTransform transform2;
+  // try {
+  //   listener->lookupTransform("/map", "/odom", msg->header.stamp, transform2);
+  // } catch (tf::TransformException ex) {
+  //   ROS_ERROR("%s",ex.what());
+  //   return;
+  // }
+  // ROS_INFO("/odom -> /map: %f, %f, %f", transform2.getOrigin().x(), transform2.getOrigin().y(), transform2.getOrigin().z());
+  // return;
+  
   tf::StampedTransform transform;
   try {
-    listener->lookupTransform("/base_link", "/openni_rgb_optical_frame", msg->header.stamp, transform);
+    listener->lookupTransform("/openni_camera", "/map", msg->header.stamp, transform);
   } catch (tf::TransformException ex) {
     ROS_ERROR("%s",ex.what());
     return;
@@ -165,7 +176,7 @@ int main (int argc, char **argv) {
   running = false;
   
   ROS_INFO("Writing binary map file.");
-  ros_tree->octree.writeBinary("map.bt");
+  ros_tree->octree.writeBinary("/tmp/map.bt");
   
   return 0;
 }
