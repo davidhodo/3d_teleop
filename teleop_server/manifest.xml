@@ -12,6 +12,7 @@
   <depend package="octomap"/>
   <depend package="octomap_ros"/>
   <depend package="pcl"/>
+  <depend package="pcl_ros"/>
   <depend package="tf"/>
   <depend package="nav_msgs"/>
   <depend package="geometry_msgs"/>

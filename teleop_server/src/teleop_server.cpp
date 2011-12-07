@@ -8,6 +8,8 @@
 #include "sensor_msgs/PointCloud.h"
 #include "nav_msgs/GridCells.h"
 #include "geometry_msgs/Point.h"
+#include "pcl_ros/transforms.h"
+#include "sensor_msgs/point_cloud_conversion.h"
 
 #include <octomap/octomap.h>
 #include <octomap_ros/OctomapROS.h>
@@ -53,45 +55,45 @@ bool first_time_setup() {
   return true;
 }
 
-void publishOccupiedGridCells() {
-  nav_msgs::GridCells msg;
-  
-  msg.header.stamp = ros::Time::now();
-  msg.header.frame_id = "/map";
-  
-  msg.cell_height = resolution;
-  msg.cell_width = resolution;
-  
-  list<octomap::OcTreeVolume> occupied_leafs;
-  
-  ros_tree->octree.getOccupied(occupied_leafs);
-  
-  list<octomap::OcTreeVolume>::const_iterator it = occupied_leafs.begin(), end = occupied_leafs.end();
-  
-  msg.cells.resize(occupied_leafs.size());
-  
-  size_t count = 0;
-  for(; it != end; ++it) {
-    geometry_msgs::Point pt;
-    pt.y = it->first.x();
-    pt.z = it->first.y();
-    pt.x = it->first.z();
-    
-    msg.cells.push_back(pt);
-    
-    ++count;
-  }
-  
-  grid_cell_pub->publish(msg);
-}
+// void publishOccupiedGridCells() {
+//   nav_msgs::GridCells msg;
+//   
+//   msg.header.stamp = ros::Time::now();
+//   msg.header.frame_id = "/map";
+//   
+//   msg.cell_height = resolution;
+//   msg.cell_width = resolution;
+//   
+//   list<octomap::OcTreeVolume> occupied_leafs;
+//   
+//   ros_tree->octree.getOccupied(occupied_leafs);
+//   
+//   list<octomap::OcTreeVolume>::const_iterator it = occupied_leafs.begin(), end = occupied_leafs.end();
+//   
+//   msg.cells.resize(occupied_leafs.size());
+//   
+//   size_t count = 0;
+//   for(; it != end; ++it) {
+//     geometry_msgs::Point pt;
+//     pt.y = it->first.x();
+//     pt.z = it->first.y();
+//     pt.x = it->first.z();
+//     
+//     msg.cells.push_back(pt);
+//     
+//     ++count;
+//   }
+//   
+//   grid_cell_pub->publish(msg);
+// }
 
 void publishOccupiedPointCloud() {
   ros::Time start, end_t;
   start = ros::Time::now();
-  sensor_msgs::PointCloud msg;
+  sensor_msgs::PointCloud msg, tf_msg;
   
   msg.header.stamp = ros::Time::now();
-  msg.header.frame_id = "/map";
+  msg.header.frame_id = "/octomap";
   
   list<octomap::OcTreeVolume> occupied_leafs;
   
@@ -109,6 +111,8 @@ void publishOccupiedPointCloud() {
     msg.points.push_back(pt);
   }
   
+//  tf::Transform transform(btTransform(btQuaternion(0.0,90.0,0.0)));
+  
   point_cloud_pub->publish(msg);
   
   end_t = ros::Time::now();
@@ -125,19 +129,18 @@ void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg) {
     if (!first_time_setup())
       return;
   
-  // tf::StampedTransform transform2;
-  // try {
-  //   listener->lookupTransform("/map", "/odom", msg->header.stamp, transform2);
-  // } catch (tf::TransformException ex) {
-  //   ROS_ERROR("%s",ex.what());
-  //   return;
-  // }
-  // ROS_INFO("/odom -> /map: %f, %f, %f", transform2.getOrigin().x(), transform2.getOrigin().y(), transform2.getOrigin().z());
-  // return;
-  
   tf::StampedTransform transform;
   try {
-    listener->lookupTransform("/openni_camera", "/map", msg->header.stamp, transform);
+    listener->lookupTransform("/map", "/openni_rgb_optical_frame", msg->header.stamp, transform);
+  } catch (tf::TransformException ex) {
+    ROS_ERROR("%s",ex.what());
+    return;
+  }
+  ROS_INFO("/openni_rgb_optical_frame -> /map: %f, %f, %f", transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z());
+  
+  sensor_msgs::PointCloud2 transformed_cloud;
+  try {
+    pcl_ros::transformPointCloud("/map", *msg, transformed_cloud, *listener);
   } catch (tf::TransformException ex) {
     ROS_ERROR("%s",ex.what());
     return;
@@ -145,7 +148,7 @@ void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg) {
   
   octomap::point3d origin(transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z());
   
-  ros_tree->insertScan(*msg, octomap::pointOctomapToMsg(origin));
+  ros_tree->insertScan(transformed_cloud, octomap::pointOctomapToMsg(origin));
   end = ros::Time::now();
   
   // publishOccupiedGridCells();

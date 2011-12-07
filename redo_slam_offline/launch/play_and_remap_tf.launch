@@ -13,6 +13,10 @@
     <param name="rotation" value="-5.0" />
   </node>
   
+  <node pkg="tf" type="static_transform_publisher" 
+    name="adjusted_kinect_broadcaster" 
+    args="0 0 0 0 -1.57079633 -1.57079633 /map /octomap 100" />
+  
   <!-- Launch SLAM -->
   <!-- Start Gmapping -->
   <node pkg="gmapping" type="slam_gmapping" name="gmapping" 
