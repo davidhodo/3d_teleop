@@ -1,0 +1,16 @@
+<package>
+  <description brief="time_example">
+
+     time_example
+
+  </description>
+  <author>William Woodall</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/time_example</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+
+</package>
+
+

@@ -1,0 +1,13 @@
+<launch>
+  <param name="/use_sim_time" value="true" />
+  
+  <!-- Launch the teleop server -->
+  <node pkg="teleop_server" type="teleop_server" name="teleop_server_node"
+        output="screen">
+    <!-- <param name="rotation" value="-5.0" /> -->
+  </node>
+  
+  <node pkg="misc_scripts" type="odom_to_tf_sim.py" name="odom_to_tf" output="screen" />
+  <node pkg="misc_scripts" type="pc_to_pc2" name="pc_to_pc2" output="screen"/>
+  
+</launch>
