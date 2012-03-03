@@ -9,19 +9,19 @@
   <!-- </node> -->
   
   <!-- Launch the tf remapper -->
-  <node pkg="misc_scripts" type="remap_tf.py" name="remap_tf">
+  <!-- <node pkg="misc_scripts" type="remap_tf.py" name="remap_tf">
     <param name="rotation" value="-5.0" />
   </node>
   
   <node pkg="tf" type="static_transform_publisher" 
     name="adjusted_kinect_broadcaster" 
-    args="0 0 0 0 -1.57079633 -1.57079633 /map /octomap 100" />
+    args="0 0 0 0 -1.57079633 -1.57079633 /map /octomap 100" /> -->
   
   <!-- Launch SLAM -->
   <!-- Start Gmapping -->
   <node pkg="gmapping" type="slam_gmapping" name="gmapping" 
         output="screen">
-    <param name="inverted_laser" value="false" />
+    <!-- <param name="inverted_laser" value="true" /> -->
     <param name="maxUrange" value="30.0" />
     <param name="particles" value="30" />
     <param name="delta" value="0.01" />
@@ -33,11 +33,15 @@
     <param name="linearUpdate" value="0.1" />
     <param name="map_update_interval" value="1.0" />
     <param name="resampleThreshold" value="0.3" />
-    <param name="llsamplerange" value ="0.05" />
-    <param name="llsamplestep" value ="0.05" />
-    <param name="lasamplerange" value ="0.05" />
-    <param name="lasamplestep" value ="0.05" />
+    <param name="llsamplerange" value="0.05" />
+    <param name="llsamplestep" value="0.05" />
+    <param name="lasamplerange" value="0.05" />
+    <param name="lasamplestep" value="0.05" />
+    <!-- <param name="bae_frame" value="base_footprint" /> -->
+    <remap from="scan" to="scan_filtered"/>
   </node>
+
+  <!-- <node pkg="misc_scripts" type="odom2tf.py" name="odom2tf" output="screen"/> -->
   
   <!-- Launch the teleop server -->
   <!-- <node pkg="teleop_server" type="teleop_server" name="teleop_server_node" -->
