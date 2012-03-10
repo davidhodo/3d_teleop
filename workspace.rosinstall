@@ -11,6 +11,6 @@
     meta: {repo-name: au-automow}
     uri: https://github.com/Auburn-Automow/au_automow_common.git
     version: '2012'
-- svn: {local-name: octomap_mapping, uri: 'http://alufr-ros-pkg.googlecode.com/svn/tags/stacks/octomap_mapping/octomap_mapping-0.4.1'}
-- svn: {local-name: octomap, uri: 'https://octomap.svn.sourceforge.net/svnroot/octomap/tags/v1.4.0/'}
+- git: {local-name: octomap_mapping, uri: 'https://github.com/wjwwood/octomap_mapping.git', version: 'master'}
+- git: {local-name: octomap, uri: 'https://github.com/wjwwood/octomap.git', version: 'master'}
 - git: {local-name: bumblebee2, uri: 'https://github.com/GAVLab/bumblebee2.git', version: master}

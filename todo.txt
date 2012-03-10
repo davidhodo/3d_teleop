@@ -1,0 +1,11 @@
+* -Run SLAM with hokuyo-
+* -Align the Kinect with the Sick-
+* Process BB2
+* Align BB2 with Sick and Kinect
+* Run octomap with Sick and Kinect
+* Run octomap with Sick and BB2
+* Get shot of angular smearing
+* Get shot of translational smearing
+* Get shot of time smearing
+* Get shot of depth accuracy between Sick and Kinect
+* Modify Octomap to use variable hit/miss on depth of point
