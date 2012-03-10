@@ -16,6 +16,8 @@
   <depend package="tf"/>
   <depend package="nav_msgs"/>
   <depend package="geometry_msgs"/>
+  <depend package="visualization_msgs"/>
+  <depend package="std_msgs"/>
 
 </package>
 

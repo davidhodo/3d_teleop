@@ -1,0 +1,13 @@
+<launch>
+	<param name="/use_sim_time" value="true" />
+	
+	<node pkg="image_transport" type="republish" name="republish_left" args="compressed raw" output="screen">
+		<remap from="in" to="/camera/left/image_color" />
+		<remap from="out" to="/camera/left/image_color" />
+	</node>
+
+	<node pkg="image_transport" type="republish" name="republish_right" args="compressed raw" output="screen">
+		<remap from="in" to="/camera/right/image_color" />
+		<remap from="out" to="/camera/right/image_color" />
+	</node>
+</launch>

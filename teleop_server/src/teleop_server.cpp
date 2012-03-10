@@ -10,6 +10,8 @@
 #include "geometry_msgs/Point.h"
 #include "pcl_ros/transforms.h"
 #include "sensor_msgs/point_cloud_conversion.h"
+#include "std_msgs/ColorRGBA.h"
+#include "visualization_msgs/MarkerArray.h"
 
 #include <octomap/octomap.h>
 #include <octomap_ros/OctomapROS.h>
@@ -41,7 +43,7 @@ bool first_time_setup() {
   tf::StampedTransform transform;
   
   try {
-    listener->lookupTransform("/odom", "/openni_camera", ros::Time(0), transform);
+    listener->lookupTransform("/map", "/openni_camera", ros::Time(0), transform);
   } catch (tf::TransformException ex) {
     ROS_ERROR("%s",ex.what());
     return false;
@@ -87,36 +89,72 @@ bool first_time_setup() {
 //   grid_cell_pub->publish(msg);
 // }
 
-void publishOccupiedPointCloud() {
-  ros::Time start, end_t;
-  start = ros::Time::now();
-  sensor_msgs::PointCloud msg, tf_msg;
+// void publishOccupiedPointCloud() {
+//   ros::Time start, end_t;
+//   start = ros::Time::now();
+//   sensor_msgs::PointCloud msg, tf_msg;
   
-  msg.header.stamp = ros::Time::now();
-  msg.header.frame_id = "/octomap";
+//   msg.header.stamp = ros::Time::now();
+//   msg.header.frame_id = "/octomap";
   
+//   list<octomap::OcTreeVolume> occupied_leafs;
+  
+//   ros_tree->octree.getOccupied(occupied_leafs);
+  
+//   list<octomap::OcTreeVolume>::const_iterator it = occupied_leafs.begin(), end = occupied_leafs.end();
+  
+//   msg.points.resize(occupied_leafs.size());
+  
+//   for(; it != end; ++it) {
+//     geometry_msgs::Point32 pt;
+//     pt.y = it->first.x();
+//     pt.z = it->first.y();
+//     pt.x = it->first.z();
+//     msg.points.push_back(pt);
+//   }
+  
+// //  tf::Transform transform(btTransform(btQuaternion(0.0,90.0,0.0)));
+  
+//   point_cloud_pub->publish(msg);
+  
+//   end_t = ros::Time::now();
+//   ROS_INFO("Publishing the PointCloud took: %f seconds", (end_t-start).toSec());
+// }
+
+std_msgs::ColorRGBA marker_color;
+
+void publishMarkers() {
   list<octomap::OcTreeVolume> occupied_leafs;
+  visualization_msgs::MarkerArray marker_array;
   
   ros_tree->octree.getOccupied(occupied_leafs);
   
   list<octomap::OcTreeVolume>::const_iterator it = occupied_leafs.begin(), end = occupied_leafs.end();
   
-  msg.points.resize(occupied_leafs.size());
-  
+  marker_array.markers.resize(occupied_leafs.size());
+
+  int i = 0;
   for(; it != end; ++it) {
-    geometry_msgs::Point32 pt;
+    double cell_size = ros_tree->octree.getNodeSize(i);
+
+    geometry_msgs::Point pt;
     pt.y = it->first.x();
     pt.z = it->first.y();
     pt.x = it->first.z();
-    msg.points.push_back(pt);
+    marker_array.markers[i].points.push_back(pt);
+
+    marker_array.markers[i].header.frame_id = "/map";
+    marker_array.markers[i].header.stamp = ros::Time::now();
+    marker_array.markers[i].ns = "map";
+    marker_array.markers[i].id = i;
+    marker_array.markers[i].type = visualization_msgs::Marker::CUBE_LIST;
+    marker_array.markers[i].scale.x = cell_size;
+    marker_array.markers[i].scale.y = cell_size;
+    marker_array.markers[i].scale.z = cell_size;
+    marker_array.markers[i].color = marker_color;
+
+    i++;
   }
-  
-//  tf::Transform transform(btTransform(btQuaternion(0.0,90.0,0.0)));
-  
-  point_cloud_pub->publish(msg);
-  
-  end_t = ros::Time::now();
-  ROS_INFO("Publishing the PointCloud took: %f seconds", (end_t-start).toSec());
 }
 
 void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg) {
@@ -152,7 +190,8 @@ void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg) {
   end = ros::Time::now();
   
   // publishOccupiedGridCells();
-  publishOccupiedPointCloud();
+  // publishOccupiedPointCloud();
+  publishMarkers();
   
   ROS_INFO("Pointcloud2 processing took: %f seconds", (end-start).toSec());
 }
@@ -164,13 +203,14 @@ int main (int argc, char **argv) {
   
   listener = new tf::TransformListener();
   
-  ros::Subscriber sub = n.subscribe("cloud_throttled", 1, pointcloudCallback);
-  
-  ros::Publisher temp = n.advertise<nav_msgs::GridCells>("/octomap", 1000);
-  grid_cell_pub = &temp;
-  
-  temp = n.advertise<sensor_msgs::PointCloud>("/octomap_points", 1000);
-  point_cloud_pub = &temp;
+  ros::Subscriber sub = n.subscribe("/camera/rgb/points", 1, pointcloudCallback);
+
+  marker_color.r = 1.0;
+  marker_color.g = 1.0;
+  marker_color.b = 1.0;
+  marker_color.a = 1.0;
+
+
   
   running = true;
   

@@ -10,13 +10,9 @@ pub = None
 
 def callback(msg):
     br = tf.TransformBroadcaster()
-    q = tf.transformations.random_quaternion()
-    q[0] = msg.pose.pose.orientation.x
-    q[1] = msg.pose.pose.orientation.y
-    q[2] = msg.pose.pose.orientation.z
-    q[3] = msg.pose.pose.orientation.w
     br.sendTransform((msg.pose.pose.position.x, msg.pose.pose.position.y, 0),
-                     q,
+                     (msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, 
+                      msg.pose.pose.orientation.z, msg.pose.pose.orientation.w),
                      msg.header.stamp,
                      "base_footprint",
                      "odom")

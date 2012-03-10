@@ -1,0 +1,16 @@
+# THIS IS A FILE WHICH IS MODIFIED BY rosinstall
+# IT IS UNLIKELY YOU WANT TO EDIT THIS FILE BY HAND
+# IF YOU WANT TO CHANGE THE ROS ENVIRONMENT VARIABLES
+# USE THE rosinstall TOOL INSTEAD.
+# IF YOU CHANGE IT, USE rosinstall FOR THE CHANGES TO TAKE EFFECT
+- other: {local-name: /opt/ros/electric/ros}
+- other: {local-name: /opt/ros/electric/stacks}
+- git: {local-name: 3d_teleop, uri: 'https://github.com/wjwwood/3d_teleop.git', version: master}
+- git:
+    local-name: au_automow_common
+    meta: {repo-name: au-automow}
+    uri: https://github.com/Auburn-Automow/au_automow_common.git
+    version: '2012'
+- svn: {local-name: octomap_mapping, uri: 'http://alufr-ros-pkg.googlecode.com/svn/tags/stacks/octomap_mapping/octomap_mapping-0.4.1'}
+- svn: {local-name: octomap, uri: 'https://octomap.svn.sourceforge.net/svnroot/octomap/tags/v1.4.0/'}
+- git: {local-name: bumblebee2, uri: 'https://github.com/GAVLab/bumblebee2.git', version: master}

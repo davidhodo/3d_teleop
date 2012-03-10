@@ -1,0 +1,25 @@
+<launch>
+	<param name="/use_sim_time" value="true" />
+	
+	<node pkg="misc_scripts" type="odom2tf.py" name="odom2tf" output="screen" />
+	<node pkg="misc_scripts" type="automow_laser_filter.py" name="automow_laser_filter" output="screen" />
+	<include file="$(find automow_bringup)/launch/transforms.xml"/>
+
+	<!-- <include file="$(find misc_scripts)/launch/octomap_server.launch"/> -->
+	<!-- <include file="$(find redo_slam_offline)/launch/play_and_remap_tf.launch"/> -->
+
+<!--
+	<node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
+    	<param name="output_frame" value="odom"/>
+    	<param name="freq" value="30.0"/>
+		<param name="sensor_timeout" value="1.0"/>
+	    <param name="odom_used" value="true"/>
+	    <param name="imu_used" value="true"/>
+	    <param name="vo_used" value="false"/>
+	    <param name="debug" value="false"/>
+	    <param name="self_diagnose" value="false"/>
+	    <remap from="imu_data" to="imu/data"/>
+	  </node>
+	  <node pkg="misc_scripts" type="imu_integrator.py" name="imu_integrator" output="screen" />
+	-->
+</launch>

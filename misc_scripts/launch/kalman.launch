@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="misc_scripts" type="kalman.py" name="kalman" output="screen"/>
+</launch>
