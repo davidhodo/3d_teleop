@@ -1,0 +1,1 @@
+- git: {local-name: 3d_teleop, uri: 'https://github.com/wjwwood/3d_teleop.git', version: master}
