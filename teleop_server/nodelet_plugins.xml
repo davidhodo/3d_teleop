@@ -1,0 +1,7 @@
+<library path="lib/libmapper_nodelet">
+  <class name="teleop_server/MapperNodelet" type="teleop_server::MapperNodelet" base_class_type="nodelet::Nodelet">
+  <description>
+  	This is a nodelet designed to subscribe to Point Cloud data and TF data to produce a 3d map.
+  </description>
+  </class>
+</library>
