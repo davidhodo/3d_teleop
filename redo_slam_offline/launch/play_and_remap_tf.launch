@@ -1,7 +1,7 @@
 <launch>
   <param name="/use_sim_time" value="true" />
   
-  <arg name="bag_file" />
+  <!-- <arg name="bag_file" /> -->
   
   <!-- Launch the bag playback -
   <node pkg="rosbag" name="rosbag" type="rosbag" required="true"
@@ -15,7 +15,7 @@
     <!-- <param name="inverted_laser" value="true" /> -->
     <param name="maxUrange" value="50.0" />
     <param name="particles" value="30" />
-    <param name="delta" value="0.01" />
+    <param name="delta" value="0.05" />
     <param name="xmin" value="-15.0" />
     <param name="xmax" value="15.0" />
     <param name="ymin" value="-15.0" />

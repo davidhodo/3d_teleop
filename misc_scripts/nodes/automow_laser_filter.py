@@ -20,7 +20,7 @@ def callback(msg, pub):
 
 def callback2(msg, pub):
     ranges = list(msg.ranges)
-    for i in range(100):
+    for i in range(150):
         ranges[i] = 0.0
     offset = len(ranges) - 150
     for i in range(150):
@@ -32,10 +32,10 @@ def main():
     rospy.init_node('automow_laser_filter')
     
     pub1 = rospy.Publisher("scan_filtered", LaserScan)
-    pub2 = rospy.Publisher("sick/scan_filtered", LaserScan)
+    # pub2 = rospy.Publisher("sick/scan_filtered", LaserScan)
 
-    rospy.Subscriber("scan", LaserScan, callback, pub1)
-    rospy.Subscriber("sick/scan", LaserScan, callback2, pub2)
+    rospy.Subscriber("scan", LaserScan, callback2, pub1)
+    # rospy.Subscriber("sick/scan", LaserScan, callback2, pub2)
     
     rospy.spin()
 
