@@ -40,15 +40,17 @@ void MapperNodelet::onInit() {
   this->nh_.param<double>("resolution", this->resolution_, 0.025);
 
   // Setup the octree
-  this->ros_octree_ = new octomap::OcTreeROS(this->resolution_);
-  tree_depth_ = this->ros_octree_->octree.getTreeDepth();
+  this->octree_ = new octomap::ColorOcTree(this->resolution_);
+  this->tree_depth_ = this->octree_->getTreeDepth();
 
   // Setup ROS communications
   this->pc2_sub_ =
     this->nh_.subscribe<PCLPointCloud>("input", 1,
                                        &MapperNodelet::onInputPC2, this);
-  this->map_pub_ =
-    this->nh_.advertise<visualization_msgs::MarkerArray>("visualization_markers", 10);
+  this->map_pub_ = this->nh_.advertise<
+    visualization_msgs::MarkerArray>("visualization_markers", 10);
+  // this->map_bin_pub_ = this->nh_.advertise<
+    // teleop_server::OctreeBinWithPoseAndColor>("octree", 10);
 }
 
 void MapperNodelet::onInputPC2(const PCLPointCloud::ConstPtr& cloud) {
@@ -83,7 +85,7 @@ void MapperNodelet::onInputPC2(const PCLPointCloud::ConstPtr& cloud) {
   // Downsample to reduce the number of raytraces
   pcl::VoxelGrid<PCLPoint> downsample;
   downsample.setInputCloud(pc.makeShared());
-  double ds_resolution = 0.01f;
+  double ds_resolution = 0.025f;
   downsample.setLeafSize(ds_resolution, ds_resolution, ds_resolution);
   downsample.filter(pc);
 
@@ -96,24 +98,56 @@ void MapperNodelet::insertScan(const tf::Point& sensor_origin_tf,
                                const PCLPointCloud& pc)
 {
   // Convert the sensor origin to a PCL point
-  octomap::point3d p = octomap::pointTfToOctomap(sensor_origin_tf);
-  pcl::PointXYZ sensor_origin(p.x(), p.y(), p.z());
+  octomap::point3d origin = octomap::pointTfToOctomap(sensor_origin_tf);
+  // pcl::PointXYZ sensor_origin(p.x(), p.y(), p.z());
 
-  // Insert into the octomap octree
-  this->ros_octree_->insertScan(pc, sensor_origin);
+  // For each point in the point cloud
+  octomap::KeySet free_cells, occupied_cells;
+  octomap::KeyRay keyray;
+  for (size_t i = 0; i < pc.points.size(); ++i) {
+    // Get the point in octomap type
+    octomap::point3d p = octomap::pointPCLToOctomap(pc.points[i]);
+    // Calculate the free cells
+    if (this->octree_->computeRayKeys(origin, p, keyray)){
+      free_cells.insert(keyray.begin(), keyray.end());
+    }
+    // Calculate the occupied cell
+    octomap::OcTreeKey key;
+    if (this->octree_->genKey(p, key)) {
+      occupied_cells.insert(key);
+    }
+  }
+  // Update the tree
+  for (octomap::KeySet::iterator it = free_cells.begin();
+       it != free_cells.end(); ++it)
+  {
+    this->octree_->updateNode(*it, false, false);
+  }
+  for (octomap::KeySet::iterator it = occupied_cells.begin();
+       it != occupied_cells.end(); ++it)
+  {
+    this->octree_->updateNode(*it, true, false);
+  }
+  // this->octree_->prune();
 }
 
 void MapperNodelet::publishMap() {
+  if (this->map_pub_.getNumSubscribers() > 0) {
+    this->publishMapAsMarkers();
+  }
+}
+
+void MapperNodelet::publishMapAsMarkers() {
   visualization_msgs::MarkerArray msg;
   msg.markers.resize(tree_depth_+1);
 
-  typedef octomap::OcTreeROS::OcTreeType::iterator it_t;
-  it_t it = this->ros_octree_->octree.begin();
-  it_t end = this->ros_octree_->octree.end();
+  typedef octomap::ColorOcTree::iterator it_t;
+  it_t it = this->octree_->begin();
+  it_t end = this->octree_->end();
   // For leaf in leaves
   for (; it != end; ++it) {
     // If occupied
-    if (ros_octree_->octree.isNodeOccupied(*it)) {
+    if (this->octree_->isNodeOccupied(*it)) {
       // Get some info about the leaf
       double x = it.getX();
       double y = it.getY();
@@ -133,7 +167,7 @@ void MapperNodelet::publishMap() {
   std_msgs::ColorRGBA color;
   color.a = 1.0;
   for (size_t i = 0; i < msg.markers.size(); ++i) {
-    double size = this->ros_octree_->octree.getNodeSize(i);
+    double size = this->octree_->getNodeSize(i);
 
     msg.markers[i].header.frame_id = "/map";
     msg.markers[i].header.stamp = ros::Time::now();
@@ -150,6 +184,7 @@ void MapperNodelet::publishMap() {
   this->map_pub_.publish(msg);
 }
 
+// This function comes from the octomap_server pkg
 std_msgs::ColorRGBA MapperNodelet::getColorByHeight(double h) {
   double range = this->z_max_ - this->z_min_;
   h = 1.0 - std::min(std::max(h/range, 0.0), 1.0);

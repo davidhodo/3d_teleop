@@ -1,7 +1,9 @@
 #include <string>
 
 #include <octomap_ros/OctomapROS.h>
-#include <octomap/OcTreeKey.h>
+#include <octomap_ros/conversions.h>
+#include <octomap/octomap.h>
+#include <octomap/ColorOcTree.h>
 
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
@@ -26,6 +28,8 @@ namespace teleop_server
             void onInputPC2(const PCLPointCloud::ConstPtr& cloud);
             void insertScan(const tf::Point& sensorOriginTf, const PCLPointCloud& pc);
             void publishMap();
+            void publishMapAsMarkers();
+            void publishMapAsBinary();
             std_msgs::ColorRGBA getColorByHeight(double h);
         private:
             string world_frame_;
@@ -35,10 +39,11 @@ namespace teleop_server
 
             tf::TransformListener listener_;
 
-            octomap::OcTreeROS * ros_octree_;
+            octomap::ColorOcTree * octree_;
 
             ros::NodeHandle nh_;
             ros::Publisher map_pub_;
+            ros::Publisher map_bin_pub_;
             ros::Subscriber pc2_sub_;
     };
 }
