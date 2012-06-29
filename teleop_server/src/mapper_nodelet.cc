@@ -5,6 +5,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <geometry_msgs/Pose.h>
+#include <octomap_msgs/OctomapBinary.h>
 
 #include <pcl/point_types.h>
 #include <pcl/ros/conversions.h>
@@ -49,8 +50,8 @@ void MapperNodelet::onInit() {
                                        &MapperNodelet::onInputPC2, this);
   this->map_pub_ = this->nh_.advertise<
     visualization_msgs::MarkerArray>("visualization_markers", 10);
-  // this->map_bin_pub_ = this->nh_.advertise<
-    // teleop_server::OctreeBinWithPoseAndColor>("octree", 10);
+  this->map_bin_pub_ = this->nh_.advertise<
+    octomap_msgs::OctomapBinary>("octree", 10);
 }
 
 void MapperNodelet::onInputPC2(const PCLPointCloud::ConstPtr& cloud) {
@@ -135,6 +136,20 @@ void MapperNodelet::publishMap() {
   if (this->map_pub_.getNumSubscribers() > 0) {
     this->publishMapAsMarkers();
   }
+  if (this->map_bin_pub_.getNumSubscribers() > 0) {
+    this->publishBinaryMap();
+  }
+}
+
+void MapperNodelet::publishBinaryMap() {
+  octomap_msgs::OctomapBinary msg;
+  msg.header.frame_id = "/map";
+  msg.header.stamp = ros::Time::now();
+  std::stringstream datastream;
+  this->octree_.writeBinaryConst(datastream);
+  std::string datastring = datastream.str();
+  msg.data = std::vector<int8_t>(datastring.begin(), datastring.end());
+  this->map_bin_pub_.publish(msg);
 }
 
 void MapperNodelet::publishMapAsMarkers() {
