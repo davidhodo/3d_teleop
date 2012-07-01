@@ -77,12 +77,12 @@ void MapperNodelet::onInputPC2(const PCLPointCloud::ConstPtr& cloud) {
   pcl::transformPointCloud(*cloud, pc, sensor_to_world);
 
   // Filter by the world's z axis
-  pcl::PassThrough<PCLPoint> pass;
+/*  pcl::PassThrough<PCLPoint> pass;
   pass.setFilterFieldName("z");
   pass.setFilterLimits(this->z_min_, this->z_max_);
   pass.setInputCloud(pc.makeShared());
   pass.filter(pc);
-
+*/
   // Downsample to reduce the number of raytraces
   pcl::VoxelGrid<PCLPoint> downsample;
   downsample.setInputCloud(pc.makeShared());
@@ -137,16 +137,16 @@ void MapperNodelet::publishMap() {
     this->publishMapAsMarkers();
   }
   if (this->map_bin_pub_.getNumSubscribers() > 0) {
-    this->publishBinaryMap();
+    this->publishMapAsBinary();
   }
 }
 
-void MapperNodelet::publishBinaryMap() {
+void MapperNodelet::publishMapAsBinary() {
   octomap_msgs::OctomapBinary msg;
   msg.header.frame_id = "/map";
   msg.header.stamp = ros::Time::now();
   std::stringstream datastream;
-  this->octree_.writeBinaryConst(datastream);
+  this->octree_->writeBinaryConst(datastream);
   std::string datastring = datastream.str();
   msg.data = std::vector<int8_t>(datastring.begin(), datastring.end());
   this->map_bin_pub_.publish(msg);

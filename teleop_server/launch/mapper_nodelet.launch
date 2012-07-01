@@ -1,5 +1,5 @@
 <launch>
-  <node pkg="nodelet" type="nodelet" name="asus_nodelet_manager"  args="manager" output="screen"/>
+  <!-- <node pkg="nodelet" type="nodelet" name="asus_nodelet_manager"  args="manager" output="screen"/> -->
 
   <node pkg="nodelet" type="nodelet" name="mapper_nodelet" args="load teleop_server/MapperNodelet asus_nodelet_manager" output="screen">
   	<remap from="input" to="/asus/depth_registered/points"/>
