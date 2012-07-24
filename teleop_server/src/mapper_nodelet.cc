@@ -1,6 +1,8 @@
 #include <ros/ros.h>
 #include <pluginlib/class_list_macros.h>
 
+#include <iostream>
+
 #include <sensor_msgs/PointCloud2.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
@@ -149,6 +151,9 @@ void MapperNodelet::publishMapAsBinary() {
   this->octree_->writeBinaryConst(datastream);
   std::string datastring = datastream.str();
   msg.data = std::vector<int8_t>(datastring.begin(), datastring.end());
+  std::ofstream outfile("map_stats.csv", std::ios_base::app);
+  outfile << std::fixed << msg.header.stamp.toSec() << ", " << msg.data.size() << std::endl;
+  outfile.close();
   this->map_bin_pub_.publish(msg);
 }
 
