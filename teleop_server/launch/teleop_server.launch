@@ -1,0 +1,13 @@
+<launch>
+  <!-- Start ATRV hardware interfaces -->
+  <include file="$(find gavlab_atrv_launch)/launch/hardware.launch" />
+
+  <!-- Start SLAM -->
+  <include file="$(find gavlab_atrv_launch)/launch/slam.launch" />
+
+  <!-- Start the tf filter -->
+  <node pkg="misc_scripts" name="tf_filter" type="tf_filter.py" />
+
+  <!-- Start the mapper nodelet -->
+  <include file="$(find teleop_server)/launch/mapper_nodelet.launch" />
+</launch>

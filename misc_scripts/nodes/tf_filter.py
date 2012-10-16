@@ -1,10 +1,10 @@
-#!/usr/bin/env python  
+#!/usr/bin/env python
 import roslib
 roslib.load_manifest('misc_scripts')
 import rospy
 
-import tf
 from tf.msg import tfMessage
+
 
 def callback(msg, filt):
     filt = tfMessage()
